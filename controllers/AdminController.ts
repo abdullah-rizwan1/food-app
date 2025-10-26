@@ -1,7 +1,18 @@
 import { Request, Response, NextFunction } from 'express'
 import { CreateVendorInput } from '../dto'
-import { Vendor } from '../models'
+import { Vendor, VendorDoc } from '../models'
 import { GenerateHashedPassword, GenerateSalt } from '../utility'
+
+export const FindVendor = async (
+    id: string | undefined,
+    email?: string
+): Promise<VendorDoc | null> => {
+    if (email) {
+        return await Vendor.findOne({ email: email })
+    } else {
+        return await Vendor.findById({ _id: id })
+    }
+}
 
 export const CreateVendor = async (
     req: Request,
@@ -19,14 +30,15 @@ export const CreateVendor = async (
         password,
     } = <CreateVendorInput>req.body
 
-    const existingVendor = await Vendor.findOne({ email: email })
-    const salt = await GenerateSalt()
-    const hashedPassword = await GenerateHashedPassword(password, salt)
+    const existingVendor = await FindVendor('', email)
+
     if (existingVendor !== null) {
         return res.json({
             message: 'A Vendor with this email id Already exists',
         })
     }
+    const salt = await GenerateSalt()
+    const hashedPassword = await GenerateHashedPassword(password, salt)
 
     const createVendor = await Vendor.create({
         name: name,
@@ -66,7 +78,7 @@ export const GetVendorById = async (
     next: NextFunction
 ) => {
     const vendorId = req.params.id
-    const vendor = await Vendor.findById({ _id: vendorId })
+    const vendor = await FindVendor(vendorId)
 
     if (vendor !== null) {
         return res.json(vendor)

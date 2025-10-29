@@ -1,11 +1,13 @@
 import express from 'express'
 import mongoose from 'mongoose'
+import path from 'path'
 // import bodyParser from 'body-parser'
 import { AdminRoutes, VendorRoutes } from './routes/index'
 import { MONOG_URI } from './config'
 
 const app = express()
 app.use(express.json())
+app.use('/images', express.static(path.join(__dirname, 'images')))
 
 app.use('/admin', AdminRoutes)
 app.use('/Vendor', VendorRoutes)

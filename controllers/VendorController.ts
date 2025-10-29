@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express'
 import { EditVendorInputs, VendorLoginInputs } from '../dto'
 import { FindVendor } from './AdminController'
 import { GenerateToken, ValidatePassword } from '../utility'
+import { CreateFoodInputs } from '../dto'
+import { Food } from '../models/Food'
 
 export const VendorLogin = async (
     req: Request,
@@ -72,6 +74,33 @@ export const UpdateVendorProfile = async (
     return res.json({ message: 'Vendor Information not found' })
 }
 
+export const UpdateVendorCoverImage = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const user = req.user
+
+    if (user) {
+        const vendor = await FindVendor(user._id)
+
+        if (vendor !== null) {
+            const files = req.files as [Express.Multer.File]
+            const images = files.map(
+                (file: Express.Multer.File) => file.filename
+            )
+            vendor.coverImages.push(...images)
+            const result = await vendor.save()
+
+            return res.json(result)
+        }
+    }
+
+    return res.json({
+        message: 'Something went wrong updating vendor cover image',
+    })
+}
+
 export const UpdateVendorService = async (
     req: Request,
     res: Response,
@@ -99,6 +128,32 @@ export const AddFood = async (
     const user = req.user
 
     if (user) {
+        const files = req.files as [Express.Multer.File]
+        const images = files.map((file: Express.Multer.File) => file.filename)
+        const { name, description, category, foodType, readyTime, price } = <
+            CreateFoodInputs
+        >req.body
+
+        const vendor = await FindVendor(user._id)
+
+        if (vendor !== null) {
+            const createFood = await Food.create({
+                vendorId: vendor._id,
+                name: name,
+                description: description,
+                category: category,
+                foodType: foodType,
+                images: images,
+                readyTime: readyTime,
+                price: price,
+                rating: 0,
+            })
+
+            vendor.foods.push(createFood)
+            const result = await vendor.save()
+
+            return res.json(result)
+        }
     }
 
     return res.json({ message: 'Something went wrong when adding food' })
@@ -112,6 +167,11 @@ export const GetFoods = async (
     const user = req.user
 
     if (user) {
+        const foods = await Food.find({ vendorId: user._id })
+
+        if (foods != null) {
+            return res.json(foods)
+        }
     }
 
     return res.json({ message: 'No food found' })

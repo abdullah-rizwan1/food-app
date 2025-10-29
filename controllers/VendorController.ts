@@ -90,3 +90,29 @@ export const UpdateVendorService = async (
 
     return res.json({ message: 'Vendor Information not found' })
 }
+
+export const AddFood = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const user = req.user
+
+    if (user) {
+    }
+
+    return res.json({ message: 'Something went wrong when adding food' })
+}
+
+export const GetFoods = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const user = req.user
+
+    if (user) {
+    }
+
+    return res.json({ message: 'No food found' })
+}

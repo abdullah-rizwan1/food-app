@@ -2,8 +2,9 @@ import bcrypt from 'bcrypt'
 import { Request } from 'express'
 import jwt from 'jsonwebtoken'
 import { VendorPayload } from '../dto'
-import { APP_SECRET } from '../config'
 import { AuthPayload } from '../dto/Auth.dto'
+
+const APP_SECRET = process.env.APP_SECRET!
 
 export const GenerateSalt = async () => {
     return await bcrypt.genSalt()

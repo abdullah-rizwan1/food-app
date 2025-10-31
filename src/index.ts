@@ -10,7 +10,7 @@ const StartServer = async () => {
     await App(app)
 
     app.listen(process.env.PORT!, () =>
-        console.log(`Listening to PORT: ${process.env.PORT!}`)
+        console.log(`Listening to PORT on Herkou: ${process.env.PORT!}`)
     )
 }
 
